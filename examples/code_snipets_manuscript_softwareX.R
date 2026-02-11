@@ -44,7 +44,7 @@ time = seq(
 
 w <- 10
 h <- 7
-dp <- 140
+dp <- 300
 legend <- c('a', 'b', 'c', 'd', 'e', 'f')
 all_plots <- list()
 i <- 1
@@ -347,6 +347,44 @@ head(df)
 
 is_dgm_friendly(df, verbose = TRUE)
 
+# Create your code text, separate into two parts for easier positioning
+code_text_a <- "> library(digiRhythm)
+> data(\"df516b_2\", package = 'digiRhythm')
+> df <- df516b_2
+> head(df)
+             datetime Motion.Index Steps
+1 2020-05-01 00:00:00            0     0
+2 2020-05-01 00:15:00            7     0
+3 2020-05-01 00:30:00            3     0
+4 2020-05-01 00:45:00           39    13
+5 2020-05-01 01:00:00           37    16
+6 2020-05-01 01:15:00           33    14"
+
+code_text_b <- "> is_dgm_friendly(df, verbose = TRUE)
+v Correct time format: First column has a POSIXct Format
+v Number of days good for DFC: 46 days >= 2 days
+v Correct numeric format - Column 2 ==> Motion.Index
+v Correct numeric format - Column 3 ==> Steps
+The data is digiRhythm friendly
+[1] TRUE"
+
+# Create a png file with 300 DPI
+png("figures/Figure 3.png", width = 8, height = 6, units = "in", res = 300)
+
+# Create an empty plot with white background
+par(bg = "white", mar = c(2, 2, 2, 2))
+plot.new()
+
+# Add the code text in two parts
+text(0.1, 0.9, code_text_a, family = "mono", cex = 0.8, adj = c(0, 1))
+text(0.1, 0.45, code_text_b, family = "mono", cex = 0.8, adj = c(0, 1))
+
+# Add bold labels (a) and (b)
+text(0.95, 0.9, "(a)", font = 1, cex = 1.0) # Bold font = 2
+text(0.95, 0.45, "(b)", font = 1, cex = 1.0)
+
+# Close the device
+dev.off()
 
 ###############################################################################
 ################################## FIGURE: 4 ##################################
@@ -396,7 +434,7 @@ my_dfc +
     axis.text.y=element_text(size=25, colour="red"))
 
 
-red###############################################################################
+###############################################################################
 ################################## FIGURE: 5 ##################################
 ###############################################################################
 
