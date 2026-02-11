@@ -1,0 +1,200 @@
+# Loading and preprocessing data in DigiRhythm
+
+This Vignette will help you making sure that the data you provide to
+DigiRhythm follows the library’s guideline. We will also make tackle few
+useful utility functions that might be helpful, especially:
+
+- import_raw_data_activity: a wrapper function that takes data where
+  date and time are in two separate columns and transform a dataset to a
+  digiRhythm friendly data set.
+- resample_dgm: this function increases the sampling period of a
+  digiRhythm friendly dataset. Usually, data are acquired in terms with
+  sampling period of seconds or minutes while most of the DigiRhythm
+  functions would be preferably run with a sampling period of 15
+  minutes.
+- is_dgm_friendly: this function will investigate whether a dataset is
+  digiRhythm friendly or not and will output a verbose explaining why.
+
+## Loading data from a sample CSV file
+
+``` r
+knitr::opts_chunk$set(echo = TRUE)
+library(digiRhythm)
+
+# A sample dataset could be found here
+url <- "https://raw.githubusercontent.com/nasserdr/digiRhythm_sample_datasets/main/516b_2.csv"
+destination <- file.path(tempdir(), "516b_2.csv")
+download.file(url, destfile = destination)
+
+# system(paste("head -n 15",  filename)) #Run it only on linux
+# IceTag ID:,,50001962,,,,
+# Site ID:,,n/a,,,,
+# Animal ID:,,n/a,,,,
+# First Record:,,30.04.2020,11:54:20,,,
+# Last Record:,,15.06.2020,11:06:55,,,
+# File Time Zone:,,W. Europe Standard Time,,,,
+#
+# Date,Time,Motion Index,Standing,Lying,Steps,Lying Bouts
+# 30.04.2020,11:54:20,0,0:00.0,0:40.0,0,0
+# 30.04.2020,11:55:00,0,0:00.0,1:00.0,0,0
+# 30.04.2020,11:56:00,0,0:00.0,1:00.0,0,0
+# 30.04.2020,11:57:00,0,0:00.0,1:00.0,0,0
+# 30.04.2020,11:58:00,0,0:00.0,1:00.0,0,0
+# 30.04.2020,11:59:00,0,0:00.0,1:00.0,0,0
+# 30.04.2020,12:00:00,0,0:00.0,1:00.0,0,0
+```
+
+As shown in the previous lines, there are some information that are not
+needed for working with the data, namely, the first 7 lines. The date
+and time columns are in two separate columns. In this case, the
+import_raw_activity_data function is useful. We did not really want to
+make a universal import function because there might be an unlimited
+number of cases. However, we only create a function called
+import_raw_activity_data that solves a couple of most encountered
+problems, namely the following:
+
+- If the date and time are in two separate columns.
+- If the user wants to change the timezone of the data (by using the
+  arguments original_tz and target_tz).
+- If the user wants to change the sampling period directly.
+- If the user wants to remove the dates that do not contains a whole day
+  recording by using trim_first_day or trim_last_day or
+  trim_middle_days. If one of these arguments is TRUE, then the function
+  will remove the data of the first (or last day, respectively) if they
+  contains data less than 80% of what they are supposed to contains.
+
+For our particular example, as mentionned in the function call below, we
+would like to skip 7 lines, we need to read 4 columns, we specified the
+date and time formats, the separator, the original and target time
+zones, the sampling rate and we want to remove all days that contains
+less than 80% of data.
+
+``` r
+data <- import_raw_activity_data(destination,
+  skipLines = 7,
+  act.cols.names = c("Date", "Time", "Motion Index", "Steps"),
+  date_format = "%d.%m.%Y",
+  time_format = "%H:%M:%S",
+  sep = ",",
+  original_tz = "CET",
+  target_tz = "CET",
+  sampling = 15,
+  trim_first_day = TRUE,
+  trim_middle_days = TRUE,
+  trim_last_day = TRUE,
+  verbose = TRUE
+)
+#> [1] "Reading the CSV file /tmp/RtmpLfFbcQ/516b_2.csv"
+#> Removing the following columns because they are not numeric
+#> [1] "First data points ... "
+#>              datetime Motion.Index Steps
+#> 1 2020-04-30 11:54:20            0     0
+#> 2 2020-04-30 11:55:00            0     0
+#> 3 2020-04-30 11:56:00            0     0
+#> [1] "Last data point ... "
+#>              datetime Motion.Index Steps
+#> 1 2020-06-15 11:06:00            0     0
+#> 2 2020-06-15 11:05:00            2     0
+#> 3 2020-06-15 11:04:00            0     0
+#> [1] "Minimum Required number of samples per day 76"
+#> [1] "Returning a data frame with datetime colum and 2 variable colums"
+#> [1] "Total number of samples is 4320 - Total number of days is 45"
+```
+
+As Shown, the argument verbose = TRUE outputs some useful information
+about the data loading process. We particularly mention the following
+output: Minimum Required number of samples per day 76. The 76 is
+obtained by computing 80% of the hypothetical data samples. In fact, if
+the sampling period is 15 min, then we are supposed to have 96 samples
+per day. 80% of the 96 samples is equal to 76, therefore, days with less
+than 96 data points are removed.
+
+## Checking if the data is digiRhythm friendly
+
+Imposing a specific format on the dataset is a design choice. We wanted
+to avoid future possible errors that might happen when user use the
+library. A digiRhythm friendly dataset has the following properties: -
+It has at least two columns. - The first column should be of a POSIX
+format (datetime). - All other columns should be numeric. - The dataset
+should contains data for 7 consecutive days at least (7 days are
+required to compute the DFC).
+
+The function \[dgm_friendly()\] returns a boolean. If verbose is set to
+TRUE, it will output details about why or why not the data is not
+considered digiRhythm friendly.
+
+``` r
+is_dgm_friendly(data, verbose = TRUE)
+#> v Correct time format: First column has a POSIXct Format 
+#> v Number of days good for DFC: 46 days >= 2 days 
+#> v Correct numeric format - Column 2 ==> Motion.Index 
+#> v Correct numeric format - Column 3 ==> Steps 
+#> The data is digiRhythm friendly
+#> [1] TRUE
+```
+
+## Removing outliers
+
+Sometimes, we may have outliers and want to remove them. Although the
+outlier removal routine is not complicated, but providing an
+off-the-shelve function for DGM friendly data is useful and might save
+time. The \[remove_activity_outliers()\] (available inside utils.R) will
+remove the outliers in all the non-POSIX columns. All data points that
+lie out of the 2.5 and 97.5 percentiles are considered outliers.
+
+``` r
+data_without_outliers <- remove_activity_outliers(data)
+head(data_without_outliers)
+#>              datetime Motion.Index Steps
+#> 1 2020-05-01 00:00:00            0     0
+#> 2 2020-05-01 00:15:00            7     0
+#> 3 2020-05-01 00:30:00            3     0
+#> 4 2020-05-01 00:45:00           39    13
+#> 5 2020-05-01 01:00:00           37    16
+#> 6 2020-05-01 01:15:00           33    14
+```
+
+## Resampling data
+
+Often, data are acquired with milliseconds or seconds sampling periods.
+However, transforming data to higher sampling periods is recommended for
+some algorithms like the degree of functional coupling. The library
+offers resampling function as it is useful in this case. However, here
+are two considerations:
+
+- The sampling period can be increased but not decreased. For instance,
+  we can transform data from 1 min sampling period to 15 minutes
+  sampling period.
+- The resampling concerns only activity variables where it makes sense
+  to make an additive resampling. For instance, if we are measuring the
+  number of steps every 1 min and we want to resample it to 15 minutes,
+  we can simply add all the steps during these 15 minutes. For other
+  types of variables, this might not be the case. For example, if we are
+  measuring the speed or the acceleration, addition would not probably
+  make sense, and a further transformation is required (in this case, it
+  would be dividing by 15 to obtain the average speed or acceleration).
+  In other case where the variable reflect a categorical entity that
+  could be transformed into a dummy variable, we argue that resampling
+  would not at all make sense.
+
+``` r
+resampled_data <- resample_dgm(data, new_sampling = 15)
+head(resampled_data)
+#>              datetime Motion.Index Steps
+#> 1 2020-05-01 00:00:00            0     0
+#> 2 2020-05-01 00:15:00            7     0
+#> 3 2020-05-01 00:30:00            3     0
+#> 4 2020-05-01 00:45:00           39    13
+#> 5 2020-05-01 01:00:00           37    16
+#> 6 2020-05-01 01:15:00           33    14
+```
+
+## Periodicity of a dataset
+
+Users can have access to the periodicity of a dataset using the
+dgm_periodicity function as shown below: - The output of the function
+shows the periodicity and start- and end-dates of the data.
+
+``` r
+s <- dgm_periodicity(data)
+```
