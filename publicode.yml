@@ -1,0 +1,85 @@
+publiccodeYmlVersion: 0.5.0
+name: DigiRhythm
+url: https://github.com/agroscope-ch/digiRhythm
+landingURL: https://cran.r-project.org/web/packages/digiRhythm/index.html
+softwareVersion: "2.4"
+releaseDate: 2025-06-30
+platforms:
+  - windows
+  - linux
+  - mac
+developmentStatus: stable
+softwareType: library
+organisation:
+  uri: https://ld.admin.ch/ou/10003634
+  name: Agroscope
+description:
+  en:
+    localisedName: DigiRhythm
+    shortDescription: Analyze and visualize animal rhythms via functional coupling,
+      harmonic power, actograms, activity, and diurnality index.
+    longDescription: >-
+      The digiRhythm package provides a set of functionalities bridging the
+      implementation gap for rhythmicity analysis, extending beyond the
+      calculation of the DFC (Degree of Functional Coupling) and HP (Harmonic
+      Power). Developed in collaboration with animal behavior scientists, the
+      package includes features adjusted to the needs of livestock researchers
+      interested in rhythmicity assessment. A key design consideration was
+      flexibility in data visualization and ability to access the output of each
+      function: Thus, all functions output graphs are in ggplot format. This
+      allows researchers to customize the aesthetics of the plots and access the
+      underlying data within the ggplot objects, ensuring researchers can access
+      the data for further scientific analysis or modify the plots directly
+      using ggplot aesthetics.
+
+
+      At present, the digiRhythm library includes the following features:
+
+      1. dfc: This function allows for both computation and graphical
+      representation of the DFC and the HP.
+
+      2. lomb_scargle_periodogram: This function not only computes the
+      Lomb-Scargle periodogram (LSP) but also provides a visualization,
+      containing graphical elements to identify significant/non-significant as
+      well as harmonic and non-harmonic peaks.
+
+      3. actogram: This tool is designed for actogram visualization. Activities
+      are visualized as tiles in a heat-map with the time of day on the x-axis
+      and the date on the y-axis.
+
+      4. daily_average_activity: This feature facilitates the calculation and
+      visualization of the daily average activity.
+
+      5. diurnality: With this function, users can compute and graphically
+      present the diurnality index. Here, the day and nighttime are fixed for
+      the whole dataset.
+
+      6. diurnality_customTimes: an alternative of the diurnality index where
+      the user can specify variable start and end of day and nighttime.
+    documentation: https://www.sciencedirect.com/science/article/pii/S2352711025001517
+    features:
+      - Degree of Functional Coupling
+      - Diurnality Index
+      - Actogram
+      - Lomb-Scargle Periodogram
+      - Harmonic Power
+      - Average activity
+    screenshots:
+      - https://ars.els-cdn.com/content/image/1-s2.0-S2352711025001517-gr1_lrg.jpg
+      - https://ars.els-cdn.com/content/image/1-s2.0-S2352711025001517-gr2.jpg
+      - https://ars.els-cdn.com/content/image/1-s2.0-S2352711025001517-gr3.jpg
+      - https://ars.els-cdn.com/content/image/1-s2.0-S2352711025001517-gr4.jpg
+      - https://ars.els-cdn.com/content/image/1-s2.0-S2352711025001517-gr5.jpg
+      - https://ars.els-cdn.com/content/image/1-s2.0-S2352711025001517-gr6.jpg
+legal:
+  license: LGPL-3.0-only
+maintenance:
+  type: community
+  contacts:
+    - name: Hassan-Roland Nasser
+      email: hassan.nasser@me.com
+      affiliation: Researcher
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - en
