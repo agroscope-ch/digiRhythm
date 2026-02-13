@@ -84,7 +84,7 @@ data <- import_raw_activity_data(destination,
   trim_last_day = TRUE,
   verbose = TRUE
 )
-#> [1] "Reading the CSV file /tmp/Rtmp7s3jQp/516b_2.csv"
+#> [1] "Reading the CSV file /tmp/RtmpcjnBbG/516b_2.csv"
 #> Removing the following columns because they are not numeric
 #> [1] "First data points ... "
 #>              datetime Motion.Index Steps
