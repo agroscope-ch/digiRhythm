@@ -56,7 +56,6 @@ description:
 
       6. diurnality_customTimes: an alternative of the diurnality index where
       the user can specify variable start and end of day and nighttime.
-    documentation: https://www.sciencedirect.com/science/article/pii/S2352711025001517
     features:
       - Degree of Functional Coupling
       - Diurnality Index
